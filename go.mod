@@ -14,6 +14,7 @@ require (
 
 require (
 	github.com/google/uuid v1.1.1 // indirect
+	github.com/gorilla/websocket v1.5.0
 	github.com/klauspost/compress v1.10.3 // indirect
 	github.com/kr/pretty v0.3.1
 	go.opencensus.io v0.22.3 // indirect

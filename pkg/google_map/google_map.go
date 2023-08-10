@@ -1,4 +1,4 @@
-package main
+package google_map
 
 import (
 	"log"
