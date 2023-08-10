@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"golang.org/x/time/rate"
-
 	"nhooyr.io/websocket"
 )
 
@@ -60,6 +59,10 @@ func newChatServer() *chatServer {
 type subscriber struct {
 	msgs      chan []byte
 	closeSlow func()
+
+	role            string
+	userId          string
+	currentLocation string
 }
 
 func (cs *chatServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {

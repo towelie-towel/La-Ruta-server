@@ -9,14 +9,28 @@ import (
 	"os"
 	"os/signal"
 	"time"
+
+	"github.com/kr/pretty"
+	"googlemaps.github.io/maps"
 )
 
 func main() {
 	log.SetFlags(0)
+	var err error
 
-	err := run()
+	r := &maps.DirectionsRequest{
+		Origin:      "Sydney",
+		Destination: "Perth",
+	}
+	route, _, err := Map.Directions(context.Background(), r)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("fatal direction error: %s", err)
+	}
+	pretty.Println(len(route))
+
+	err = run()
+	if err != nil {
+		log.Fatalf("fatal socket error: %s", err)
 	}
 }
 
