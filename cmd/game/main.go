@@ -198,8 +198,12 @@ func (g *Game) runGameLoop() {
 	stats.AddActiveGame()
 	defer stats.RemoveActiveGame()
 
-	g.sockets[0].GetOutBound() <- game.CreateMessage(game.Play)
-	g.sockets[1].GetOutBound() <- game.CreateMessage(game.Play)
+	// g.sockets[0].GetOutBound() <- game.CreateMessage(game.Play)
+	// g.sockets[1].GetOutBound() <- game.CreateMessage(game.Play)
+
+	for _, suckitBB := range g.sockets {
+		suckitBB.GetOutBound() <- game.CreateMessage(game.Play)
+	}
 
 	for {
 		start := g.clock.Now().UnixMicro()
@@ -331,6 +335,63 @@ func WaitForReady(s0 game.Socket, s1 game.Socket) WhenComplete {
 	go func() {
 		select {
 		case success := <-sendAndWait(s0, s1):
+			ready <- WaitForReadyResults{false, !success}
+		case <-time.After(30 * time.Second):
+			ready <- WaitForReadyResults{false, true}
+		}
+	}()
+
+	return ready
+}
+
+func sendAndWaitBBy(sockets []game.Socket) chan bool {
+	ready := make(chan bool)
+
+	go func() {
+		// readyCount := 0
+		success := true
+
+		for _, socket := range sockets {
+			socket.GetOutBound() <- game.CreateMessage(game.ReadyUp)
+		}
+
+		/* for _, socket := range sockets {
+			in := socket.GetInBound()
+			msg, ok := <-in
+
+			if !ok || msg.Message.Type != game.ReadyUp {
+				success = false
+			} else {
+				readyCount++
+			}
+
+			if readyCount == len(sockets) {
+				break
+			}
+		} */
+
+		for _, socket := range sockets {
+			in := socket.GetInBound()
+			msg, ok := <-in
+
+			if !ok || msg.Message.Type != game.ReadyUp {
+				success = false
+			}
+		}
+
+		ready <- success
+		close(ready)
+	}()
+
+	return ready
+}
+
+func spreadSomeTaxisBBy(sockets []game.Socket) WhenComplete {
+	ready := make(chan WaitForReadyResults)
+
+	go func() {
+		select {
+		case success := <-sendAndWaitBBy(sockets):
 			ready <- WaitForReadyResults{false, !success}
 		case <-time.After(30 * time.Second):
 			ready <- WaitForReadyResults{false, true}

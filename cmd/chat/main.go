@@ -119,7 +119,7 @@ func newChatServer() *chatServer {
 		subscribers:             make(map[*subscriber]struct{}),
 		publishLimiter:          rate.NewLimiter(rate.Every(time.Millisecond*100), 8),
 	}
-	cs.serveMux.Handle("/", http.FileServer(http.Dir("./assets")))
+	cs.serveMux.Handle("/", http.FileServer(http.Dir("./assets/chat")))
 	cs.serveMux.HandleFunc("/subscribe", cs.subscribeHandler)
 	cs.serveMux.HandleFunc("/publish", cs.publishHandler)
 
